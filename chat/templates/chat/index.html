@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Консультант</title>
+    <link rel="stylesheet" href="{% static 'chat/css/style.css' %}">
+</head>
+<body>
+<div class="app-container">
+
+    <!-- Sidebar -->
+    <div class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">⚡</div>
+            <h1>AI<br>Консультант</h1>
+        </div>
+
+        <!-- Consultant Selector -->
+        <div class="consultant-selector">
+            <button class="consultant-btn active" data-consultant="business" onclick="setConsultant('business')">
+                💼 Бизнес
+            </button>
+            <button class="consultant-btn" data-consultant="legal" onclick="setConsultant('legal')">
+                ⚖️ Юрист
+            </button>
+        </div>
+
+        <button class="btn-new-chat" onclick="newConversation()">+ Новый чат</button>
+
+        <div class="conversations-list" id="conversations-list">
+            {% for conv in conversations %}
+            <div class="conversation-item" data-id="{{ conv.id }}" data-consultant="{{ conv.consultant }}" onclick="loadConversation({{ conv.id }})">
+                <span class="conv-icon">{% if conv.consultant == 'legal' %}⚖️{% else %}💼{% endif %}</span>
+                <span class="conv-title">{{ conv.title }}</span>
+                <button class="conv-delete" onclick="deleteConversation(event, {{ conv.id }})" title="Удалить">×</button>
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">{{ request.user.username|first|upper }}</div>
+                <div class="user-details">
+                    <div class="username">{{ request.user.username }}</div>
+                    <div class="plan-badge {% if profile.plan == 'premium' %}premium{% else %}free{% endif %}">
+                        {% if profile.plan == 'premium' %}★ Премиум{% else %}Бесплатный{% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="token-usage">
+                <div class="token-label">
+                    <span>Токены сегодня</span>
+                    <span id="tokens-display">{{ tokens_used }} / {{ tokens_limit }}</span>
+                </div>
+                <div class="token-bar">
+                    <div class="token-bar-fill" id="tokens-bar" style="width: {{ tokens_percent }}%"></div>
+                </div>
+            </div>
+
+            <a href="/logout/" class="btn-logout">Выйти</a>
+        </div>
+    </div>
+
+    <!-- Main Area -->
+    <div class="main-area">
+        <!-- Chat Header -->
+        <div class="chat-header" id="chat-header">
+            <span id="chat-consultant-icon">💼</span>
+            <span id="chat-consultant-name">Бизнес-консультант</span>
+        </div>
+
+        <div class="chat-container" id="chat-container">
+            <div class="welcome-message">
+                <h2>Добро пожаловать!</h2>
+                <p>Выберите тип консультанта в боковой панели и задайте свой вопрос.</p>
+            </div>
+        </div>
+
+        <div class="input-container">
+            <div class="input-wrapper">
+                <textarea
+                    id="user-input"
+                    placeholder="Введите ваш вопрос..."
+                    rows="1"
+                ></textarea>
+            </div>
+            <button class="btn-send" onclick="sendMessage()" id="send-btn">Отправить</button>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    const TOKENS_LIMIT = {{ tokens_limit }};
+    let tokensUsed = {{ tokens_used }};
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="{% static 'chat/js/chat.js' %}"></script>
+</body>
+</html>
